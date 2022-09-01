@@ -13,6 +13,7 @@
 #pragma once
 
 #include "buffer/buffer_pool_manager.h"
+#include "buffer/buffer_pool_manager_instance.h"
 #include "recovery/log_manager.h"
 #include "storage/disk/disk_manager.h"
 #include "storage/page/page.h"
@@ -23,7 +24,7 @@ class ParallelBufferPoolManager : public BufferPoolManager {
  public:
   /**
    * Creates a new ParallelBufferPoolManager.
-   * @param the number of individual BufferPoolManagerInstances to store
+   * @param num_instances the number of individual BufferPoolManagerInstances to store
    * @param pool_size the pool size of each BufferPoolManagerInstance
    * @param disk_manager the disk manager
    * @param log_manager the log manager (for testing only: nullptr = disable logging)
@@ -37,21 +38,21 @@ class ParallelBufferPoolManager : public BufferPoolManager {
   ~ParallelBufferPoolManager() override;
 
   /** @return size of the buffer pool */
-  size_t GetPoolSize() override;
+  auto GetPoolSize() -> size_t override;
 
  protected:
   /**
    * @param page_id id of page
    * @return pointer to the BufferPoolManager responsible for handling given page id
    */
-  BufferPoolManager *GetBufferPoolManager(page_id_t page_id);
+  auto GetBufferPoolManager(page_id_t page_id) -> BufferPoolManager *;
 
   /**
    * Fetch the requested page from the buffer pool.
    * @param page_id id of page to be fetched
    * @return the requested page
    */
-  Page *FetchPgImp(page_id_t page_id) override;
+  auto FetchPgImp(page_id_t page_id) -> Page * override;
 
   /**
    * Unpin the target page from the buffer pool.
@@ -59,32 +60,38 @@ class ParallelBufferPoolManager : public BufferPoolManager {
    * @param is_dirty true if the page should be marked as dirty, false otherwise
    * @return false if the page pin count is <= 0 before this call, true otherwise
    */
-  bool UnpinPgImp(page_id_t page_id, bool is_dirty) override;
+  auto UnpinPgImp(page_id_t page_id, bool is_dirty) -> bool override;
 
   /**
    * Flushes the target page to disk.
    * @param page_id id of page to be flushed, cannot be INVALID_PAGE_ID
    * @return false if the page could not be found in the page table, true otherwise
    */
-  bool FlushPgImp(page_id_t page_id) override;
+  auto FlushPgImp(page_id_t page_id) -> bool override;
 
   /**
    * Creates a new page in the buffer pool.
    * @param[out] page_id id of created page
    * @return nullptr if no new pages could be created, otherwise pointer to new page
    */
-  Page *NewPgImp(page_id_t *page_id) override;
+  auto NewPgImp(page_id_t *page_id) -> Page * override;
 
   /**
    * Deletes a page from the buffer pool.
    * @param page_id id of page to be deleted
    * @return false if the page exists but could not be deleted, true if the page didn't exist or deletion succeeded
    */
-  bool DeletePgImp(page_id_t page_id) override;
+  auto DeletePgImp(page_id_t page_id) -> bool override;
 
   /**
    * Flushes all the pages in the buffer pool to disk.
    */
   void FlushAllPgsImp() override;
+
+  size_t num_instances_;
+  size_t pool_size_;
+  BufferPoolManager **instances_;
+  uint32_t starting_index_;
+  std::mutex latch_;
 };
 }  // namespace bustub

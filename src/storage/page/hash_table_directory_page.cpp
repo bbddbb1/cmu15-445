@@ -16,40 +16,65 @@
 #include "common/logger.h"
 
 namespace bustub {
-page_id_t HashTableDirectoryPage::GetPageId() const { return page_id_; }
+auto HashTableDirectoryPage::GetPageId() const -> page_id_t { return page_id_; }
 
 void HashTableDirectoryPage::SetPageId(bustub::page_id_t page_id) { page_id_ = page_id; }
 
-lsn_t HashTableDirectoryPage::GetLSN() const { return lsn_; }
+auto HashTableDirectoryPage::GetLSN() const -> lsn_t { return lsn_; }
 
 void HashTableDirectoryPage::SetLSN(lsn_t lsn) { lsn_ = lsn; }
 
-uint32_t HashTableDirectoryPage::GetGlobalDepth() { return global_depth_; }
+auto HashTableDirectoryPage::GetGlobalDepth() -> uint32_t { return global_depth_; }
 
-uint32_t HashTableDirectoryPage::GetGlobalDepthMask() { return 0; }
+auto HashTableDirectoryPage::GetGlobalDepthMask() -> uint32_t {
+  return GetGlobalDepth() == 0 ? 0 : UINT32_MAX >> (32 - global_depth_);
+}
 
-void HashTableDirectoryPage::IncrGlobalDepth() {}
+void HashTableDirectoryPage::IncrGlobalDepth() { global_depth_++; }
 
 void HashTableDirectoryPage::DecrGlobalDepth() { global_depth_--; }
 
-page_id_t HashTableDirectoryPage::GetBucketPageId(uint32_t bucket_idx) { return 0; }
+auto HashTableDirectoryPage::GetBucketPageId(uint32_t bucket_idx) -> page_id_t { return bucket_page_ids_[bucket_idx]; }
 
-void HashTableDirectoryPage::SetBucketPageId(uint32_t bucket_idx, page_id_t bucket_page_id) {}
+void HashTableDirectoryPage::SetBucketPageId(uint32_t bucket_idx, page_id_t bucket_page_id) {
+  bucket_page_ids_[bucket_idx] = bucket_page_id;
+}
 
-uint32_t HashTableDirectoryPage::Size() { return 0; }
+auto HashTableDirectoryPage::Size() -> uint32_t { return 1 << global_depth_; }
 
-bool HashTableDirectoryPage::CanShrink() { return false; }
+auto HashTableDirectoryPage::CanShrink() -> bool {
+  uint32_t global_depth = global_depth_;
+  return std::all_of(local_depths_, local_depths_ + static_cast<uint8_t>(1 << global_depth_),
+                     [global_depth](uint8_t local_depth) { return local_depth < global_depth; });
+}
 
-uint32_t HashTableDirectoryPage::GetLocalDepth(uint32_t bucket_idx) { return 0; }
+auto HashTableDirectoryPage::DoMerge(uint32_t bucket_idx, uint32_t image_bucket_idx) -> bool {
+  if (local_depths_[bucket_idx] != local_depths_[image_bucket_idx] || local_depths_[bucket_idx] <= 0 ||
+      local_depths_[image_bucket_idx] <= 0 || bucket_idx > image_bucket_idx) {
+    return false;
+  }
+  bucket_page_ids_[bucket_idx] = bucket_page_ids_[image_bucket_idx];
+  local_depths_[bucket_idx]--;
+  local_depths_[image_bucket_idx]--;
+  return true;
+}
+auto HashTableDirectoryPage::GetLocalDepth(uint32_t bucket_idx) -> uint32_t { return local_depths_[bucket_idx]; }
 
-void HashTableDirectoryPage::SetLocalDepth(uint32_t bucket_idx, uint8_t local_depth) {}
+void HashTableDirectoryPage::SetLocalDepth(uint32_t bucket_idx, uint8_t local_depth) {
+  local_depths_[bucket_idx] = local_depth;
+}
 
-void HashTableDirectoryPage::IncrLocalDepth(uint32_t bucket_idx) {}
+void HashTableDirectoryPage::IncrLocalDepth(uint32_t bucket_idx) { local_depths_[bucket_idx]++; }
 
-void HashTableDirectoryPage::DecrLocalDepth(uint32_t bucket_idx) {}
+void HashTableDirectoryPage::DecrLocalDepth(uint32_t bucket_idx) { local_depths_[bucket_idx]--; }
 
-uint32_t HashTableDirectoryPage::GetLocalHighBit(uint32_t bucket_idx) { return 0; }
+auto HashTableDirectoryPage::GetLocalHighBit(uint32_t bucket_idx) -> uint32_t {
+  return bucket_idx >> (global_depth_ - local_depths_[bucket_idx]);
+}
 
+auto HashTableDirectoryPage::GetImageIndex(uint32_t bucket_idx) -> uint32_t {
+  return global_depth_ == 0 ? 0 : bucket_idx ^ 1 << (global_depth_ - 1);
+}
 /**
  * VerifyIntegrity - Use this for debugging but **DO NOT CHANGE**
  *
@@ -93,7 +118,7 @@ void HashTableDirectoryPage::VerifyIntegrity() {
     uint32_t required_count = 0x1 << (global_depth_ - curr_ld);
 
     if (curr_count != required_count) {
-      LOG_WARN("Verify Integrity: curr_count: %u, required_count %u, for page_id: %u", curr_ld, required_count,
+      LOG_WARN("Verify Integrity: curr_count: %u, required_count %u, for page_id: %u", curr_count, required_count,
                curr_page_id);
       PrintDirectory();
       assert(curr_count == required_count);

@@ -14,11 +14,11 @@
 
 #include <list>
 #include <mutex>  // NOLINT
+#include <unordered_map>
 #include <vector>
-
 #include "buffer/replacer.h"
 #include "common/config.h"
-
+#include "common/logger.h"
 namespace bustub {
 
 /**
@@ -37,16 +37,20 @@ class LRUReplacer : public Replacer {
    */
   ~LRUReplacer() override;
 
-  bool Victim(frame_id_t *frame_id) override;
+  auto Victim(frame_id_t *frame_id) -> bool override;
 
   void Pin(frame_id_t frame_id) override;
 
   void Unpin(frame_id_t frame_id) override;
 
-  size_t Size() override;
+  auto Size() -> size_t override;
 
  private:
   // TODO(student): implement me!
+  std::mutex latch_;
+  size_t max_pages_;
+  std::list<frame_id_t> lru_list_;
+  std::unordered_map<frame_id_t, std::list<frame_id_t>::iterator> lru_map_;
 };
 
 }  // namespace bustub
