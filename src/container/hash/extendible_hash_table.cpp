@@ -260,7 +260,7 @@ void HASH_TABLE_TYPE::Merge(Transaction *transaction, const KeyType &key, const 
   page_id_t bucket_page_id = KeyToPageId(key, dir_page);
   uint32_t image_bucket_id = dir_page->GetImageIndex(bucket_id);
   page_id_t image_bucket_page_id = dir_page->GetBucketPageId(image_bucket_id);
-  dir_page->PrintDirectory();
+  // dir_page->PrintDirectory();
   if (!dir_page->DoMerge(bucket_id, image_bucket_id)) {
     buffer_pool_manager_->UnpinPage(directory_page_id_, false);
     buffer_pool_manager_->UnpinPage(bucket_page_id, false);
@@ -270,7 +270,7 @@ void HASH_TABLE_TYPE::Merge(Transaction *transaction, const KeyType &key, const 
     return;
   }
   LOG_DEBUG("successful merge bucket %d to image %d", bucket_id, image_bucket_id);
-  dir_page->PrintDirectory();
+  // dir_page->PrintDirectory();
   // shrink
 SHRINK:
   if (dir_page->CanShrink()) {
