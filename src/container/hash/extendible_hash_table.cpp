@@ -117,6 +117,7 @@ auto HASH_TABLE_TYPE::Insert(Transaction *transaction, const KeyType &key, const
     uint8_t ori_local_depth = dir_page->GetLocalDepth(bucket_id);
     table_latch_.RUnlock();
     reinterpret_cast<Page *>(dir_page)->RUnlatch();
+
     table_latch_.WLock();
     reinterpret_cast<Page *>(dir_page)->WLatch();
     if (ori_global_depth == dir_page->GetGlobalDepth() && ori_local_depth == dir_page->GetLocalDepth(bucket_id))
@@ -125,7 +126,7 @@ auto HASH_TABLE_TYPE::Insert(Transaction *transaction, const KeyType &key, const
     }
     table_latch_.WUnlock();
     reinterpret_cast<Page *>(dir_page)->WUnlatch();
-    Insert(transaction, key, value);
+    return Insert(transaction, key, value);
   }
   if (!bucket_page->Insert(key, value, comparator_)) {
     LOG_INFO("same key value pair");
@@ -184,7 +185,6 @@ auto HASH_TABLE_TYPE::SplitInsert(Transaction *transaction, const KeyType &key, 
   // dir_page->PrintDirectory();
   //  split items
   HASH_TABLE_BUCKET_TYPE *page = FetchBucketPage(bucket_page_id);
-  reinterpret_cast<Page *>(page)->WLatch();
   HASH_TABLE_BUCKET_TYPE *new_page = reinterpret_cast<HASH_TABLE_BUCKET_TYPE *>(new_pg->GetData());
   new_pg->WLatch();
   for (size_t i = 0; i < BUCKET_ARRAY_SIZE; i++) {
@@ -248,6 +248,7 @@ auto HASH_TABLE_TYPE::Remove(Transaction *transaction, const KeyType &key, const
     table_latch_.RUnlock();
     reinterpret_cast<Page *>(dir_page)->RUnlatch();
     reinterpret_cast<Page *>(bucket_page)->WUnlatch();
+
     table_latch_.WLock();
     reinterpret_cast<Page *>(dir_page)->WLatch();
     if (ori_global_depth == dir_page->GetGlobalDepth() && ori_local_depth == dir_page->GetLocalDepth(bucket_id))
@@ -257,7 +258,7 @@ auto HASH_TABLE_TYPE::Remove(Transaction *transaction, const KeyType &key, const
     }
     table_latch_.WUnlock();
     reinterpret_cast<Page *>(dir_page)->WUnlatch();
-    Remove(transaction, key, value);
+    return Remove(transaction, key, value);
   }
   buffer_pool_manager_->UnpinPage(directory_page_id_, false);
   buffer_pool_manager_->UnpinPage(bucket_page_id, true);
