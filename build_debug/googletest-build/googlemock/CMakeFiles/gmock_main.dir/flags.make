@@ -6,5 +6,5 @@ CXX_FLAGS =  -O0 -Wall -g2 -ggdb -fPIC   -Wall -Wshadow -Wno-error=dangling-else
 
 CXX_DEFINES = -DGTEST_CREATE_SHARED_LIBRARY=1 -Dgmock_main_EXPORTS
 
-CXX_INCLUDES = -isystem /home/ecd_hyb_1771632295832877/Desktop/code/cmu15445/build_debug/googletest-src/googlemock/include -isystem /home/ecd_hyb_1771632295832877/Desktop/code/cmu15445/build_debug/googletest-src/googlemock -isystem /home/ecd_hyb_1771632295832877/Desktop/code/cmu15445/build_debug/googletest-src/googletest/include -isystem /home/ecd_hyb_1771632295832877/Desktop/code/cmu15445/build_debug/googletest-src/googletest 
+CXX_INCLUDES = -isystem /home/ecd_hyb_1771632295832877/Desktop/code/cmu15-445/build_debug/googletest-src/googlemock/include -isystem /home/ecd_hyb_1771632295832877/Desktop/code/cmu15-445/build_debug/googletest-src/googlemock -isystem /home/ecd_hyb_1771632295832877/Desktop/code/cmu15-445/build_debug/googletest-src/googletest/include -isystem /home/ecd_hyb_1771632295832877/Desktop/code/cmu15-445/build_debug/googletest-src/googletest 
 

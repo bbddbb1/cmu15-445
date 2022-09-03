@@ -22,24 +22,6 @@ storage/disk/disk_manager.h
 storage/page/page.h
 ../src/include/buffer/storage/page/page.h
 
-../src/include/buffer/buffer_pool_manager_instance.h
-list
--
-mutex
--
-unordered_map
--
-buffer/buffer_pool_manager.h
-../src/include/buffer/buffer/buffer_pool_manager.h
-buffer/lru_replacer.h
-../src/include/buffer/buffer/lru_replacer.h
-recovery/log_manager.h
-../src/include/buffer/recovery/log_manager.h
-storage/disk/disk_manager.h
-../src/include/buffer/storage/disk/disk_manager.h
-storage/page/page.h
-../src/include/buffer/storage/page/page.h
-
 ../src/include/buffer/lru_replacer.h
 list
 -
@@ -324,13 +306,7 @@ string
 stdint.h
 -
 
-/home/ecd_hyb_1771632295832877/Desktop/code/cmu15445/src/buffer/buffer_pool_manager_instance.cpp
-buffer/buffer_pool_manager_instance.h
-/home/ecd_hyb_1771632295832877/Desktop/code/cmu15445/src/buffer/buffer/buffer_pool_manager_instance.h
-common/macros.h
-/home/ecd_hyb_1771632295832877/Desktop/code/cmu15445/src/buffer/common/macros.h
-
-/home/ecd_hyb_1771632295832877/Desktop/code/cmu15445/src/container/hash/extendible_hash_table.cpp
+/home/ecd_hyb_1771632295832877/Desktop/code/cmu15-445/src/container/hash/extendible_hash_table.cpp
 iostream
 -
 string
@@ -340,11 +316,11 @@ utility
 vector
 -
 common/exception.h
-/home/ecd_hyb_1771632295832877/Desktop/code/cmu15445/src/container/hash/common/exception.h
+/home/ecd_hyb_1771632295832877/Desktop/code/cmu15-445/src/container/hash/common/exception.h
 common/logger.h
-/home/ecd_hyb_1771632295832877/Desktop/code/cmu15445/src/container/hash/common/logger.h
+/home/ecd_hyb_1771632295832877/Desktop/code/cmu15-445/src/container/hash/common/logger.h
 common/rid.h
-/home/ecd_hyb_1771632295832877/Desktop/code/cmu15445/src/container/hash/common/rid.h
+/home/ecd_hyb_1771632295832877/Desktop/code/cmu15-445/src/container/hash/common/rid.h
 container/hash/extendible_hash_table.h
-/home/ecd_hyb_1771632295832877/Desktop/code/cmu15445/src/container/hash/container/hash/extendible_hash_table.h
+/home/ecd_hyb_1771632295832877/Desktop/code/cmu15-445/src/container/hash/container/hash/extendible_hash_table.h
 

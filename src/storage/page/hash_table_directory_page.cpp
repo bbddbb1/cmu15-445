@@ -44,7 +44,7 @@ auto HashTableDirectoryPage::Size() -> uint32_t { return 1 << global_depth_; }
 
 auto HashTableDirectoryPage::CanShrink() -> bool {
   uint32_t global_depth = global_depth_;
-  return std::all_of(local_depths_, local_depths_ + static_cast<uint8_t>(1 << global_depth_),
+  return std::all_of(local_depths_, local_depths_ + (1 << global_depth_),
                      [global_depth](uint8_t local_depth) { return local_depth < global_depth; });
 }
 

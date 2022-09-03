@@ -1,4 +1,4 @@
-# Install script for directory: /home/ecd_hyb_1771632295832877/Desktop/code/cmu15445/src
+# Install script for directory: /home/ecd_hyb_1771632295832877/Desktop/code/cmu15-445/src
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)

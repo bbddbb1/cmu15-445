@@ -24,11 +24,27 @@ namespace bustub {
 // NOLINTNEXTLINE
 
 // NOLINTNEXTLINE
-TEST(HashTableTest, DISABLED_SampleTest) {
+TEST(HashTableTest, SampleTest) {
   auto *disk_manager = new DiskManager("test.db");
-  auto *bpm = new BufferPoolManagerInstance(50, disk_manager);
+  auto *bpm = new BufferPoolManagerInstance(3, disk_manager);
   ExtendibleHashTable<int, int, IntComparator> ht("blah", bpm, IntComparator(), HashFunction<int>());
 
+  for (int i = 0; i < 3000; i++) {
+    ht.Insert(nullptr, i, i);
+    std::vector<int> res;
+    ht.GetValue(nullptr, i, &res);
+    EXPECT_EQ(1, res.size()) << "Failed to insert " << i << std::endl;
+    EXPECT_EQ(i, res[0]);
+  }
+  ht.VerifyIntegrity();
+
+  for (int i = 0; i < 3000; i++) {
+    EXPECT_TRUE(ht.Remove(nullptr, i, i));
+    std::vector<int> res;
+    ht.GetValue(nullptr, i, &res);
+    EXPECT_EQ(0, res.size());
+  }
+  ht.VerifyIntegrity();
   // insert a few values
   for (int i = 0; i < 5; i++) {
     ht.Insert(nullptr, i, i);

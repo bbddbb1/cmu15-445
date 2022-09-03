@@ -43,10 +43,10 @@ RM = /usr/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/ecd_hyb_1771632295832877/Desktop/code/cmu15445
+CMAKE_SOURCE_DIR = /home/ecd_hyb_1771632295832877/Desktop/code/cmu15-445
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/ecd_hyb_1771632295832877/Desktop/code/cmu15445/build_debug
+CMAKE_BINARY_DIR = /home/ecd_hyb_1771632295832877/Desktop/code/cmu15-445/build_debug
 
 # Utility rule file for format.
 
@@ -54,7 +54,7 @@ CMAKE_BINARY_DIR = /home/ecd_hyb_1771632295832877/Desktop/code/cmu15445/build_de
 include CMakeFiles/format.dir/progress.make
 
 CMakeFiles/format:
-	../build_support/run_clang_format.py /usr/bin/clang-format-12 /home/ecd_hyb_1771632295832877/Desktop/code/cmu15445/build_support/clang_format_exclusions.txt --source_dirs /home/ecd_hyb_1771632295832877/Desktop/code/cmu15445/src,/home/ecd_hyb_1771632295832877/Desktop/code/cmu15445/test, --fix --quiet
+	../build_support/run_clang_format.py /usr/bin/clang-format-12 /home/ecd_hyb_1771632295832877/Desktop/code/cmu15-445/build_support/clang_format_exclusions.txt --source_dirs /home/ecd_hyb_1771632295832877/Desktop/code/cmu15-445/src,/home/ecd_hyb_1771632295832877/Desktop/code/cmu15-445/test, --fix --quiet
 
 format: CMakeFiles/format
 format: CMakeFiles/format.dir/build.make
@@ -71,6 +71,6 @@ CMakeFiles/format.dir/clean:
 .PHONY : CMakeFiles/format.dir/clean
 
 CMakeFiles/format.dir/depend:
-	cd /home/ecd_hyb_1771632295832877/Desktop/code/cmu15445/build_debug && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/ecd_hyb_1771632295832877/Desktop/code/cmu15445 /home/ecd_hyb_1771632295832877/Desktop/code/cmu15445 /home/ecd_hyb_1771632295832877/Desktop/code/cmu15445/build_debug /home/ecd_hyb_1771632295832877/Desktop/code/cmu15445/build_debug /home/ecd_hyb_1771632295832877/Desktop/code/cmu15445/build_debug/CMakeFiles/format.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/ecd_hyb_1771632295832877/Desktop/code/cmu15-445/build_debug && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/ecd_hyb_1771632295832877/Desktop/code/cmu15-445 /home/ecd_hyb_1771632295832877/Desktop/code/cmu15-445 /home/ecd_hyb_1771632295832877/Desktop/code/cmu15-445/build_debug /home/ecd_hyb_1771632295832877/Desktop/code/cmu15-445/build_debug /home/ecd_hyb_1771632295832877/Desktop/code/cmu15-445/build_debug/CMakeFiles/format.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : CMakeFiles/format.dir/depend
 

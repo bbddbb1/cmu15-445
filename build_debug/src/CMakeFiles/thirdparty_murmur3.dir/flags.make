@@ -6,5 +6,5 @@ CXX_FLAGS =  -fPIC -Wall -Wextra -Werror -Wno-unused-parameter -Wno-attributes  
 
 CXX_DEFINES = -Dthirdparty_murmur3_EXPORTS
 
-CXX_INCLUDES = -I/home/ecd_hyb_1771632295832877/Desktop/code/cmu15445/src -I/home/ecd_hyb_1771632295832877/Desktop/code/cmu15445/src/include -I/home/ecd_hyb_1771632295832877/Desktop/code/cmu15445/test/include -I/home/ecd_hyb_1771632295832877/Desktop/code/cmu15445/third_party 
+CXX_INCLUDES = -I/home/ecd_hyb_1771632295832877/Desktop/code/cmu15-445/src -I/home/ecd_hyb_1771632295832877/Desktop/code/cmu15-445/src/include -I/home/ecd_hyb_1771632295832877/Desktop/code/cmu15-445/test/include -I/home/ecd_hyb_1771632295832877/Desktop/code/cmu15-445/third_party 
 

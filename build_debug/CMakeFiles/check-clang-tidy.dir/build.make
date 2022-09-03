@@ -43,10 +43,10 @@ RM = /usr/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/ecd_hyb_1771632295832877/Desktop/code/cmu15445
+CMAKE_SOURCE_DIR = /home/ecd_hyb_1771632295832877/Desktop/code/cmu15-445
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/ecd_hyb_1771632295832877/Desktop/code/cmu15445/build_debug
+CMAKE_BINARY_DIR = /home/ecd_hyb_1771632295832877/Desktop/code/cmu15-445/build_debug
 
 # Utility rule file for check-clang-tidy.
 
@@ -54,7 +54,7 @@ CMAKE_BINARY_DIR = /home/ecd_hyb_1771632295832877/Desktop/code/cmu15445/build_de
 include CMakeFiles/check-clang-tidy.dir/progress.make
 
 CMakeFiles/check-clang-tidy:
-	../build_support/run_clang_tidy.py -clang-tidy-binary /usr/bin/clang-tidy-12 -p /home/ecd_hyb_1771632295832877/Desktop/code/cmu15445/build_debug
+	../build_support/run_clang_tidy.py -clang-tidy-binary /usr/bin/clang-tidy-12 -p /home/ecd_hyb_1771632295832877/Desktop/code/cmu15-445/build_debug
 
 check-clang-tidy: CMakeFiles/check-clang-tidy
 check-clang-tidy: CMakeFiles/check-clang-tidy.dir/build.make
@@ -71,6 +71,6 @@ CMakeFiles/check-clang-tidy.dir/clean:
 .PHONY : CMakeFiles/check-clang-tidy.dir/clean
 
 CMakeFiles/check-clang-tidy.dir/depend:
-	cd /home/ecd_hyb_1771632295832877/Desktop/code/cmu15445/build_debug && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/ecd_hyb_1771632295832877/Desktop/code/cmu15445 /home/ecd_hyb_1771632295832877/Desktop/code/cmu15445 /home/ecd_hyb_1771632295832877/Desktop/code/cmu15445/build_debug /home/ecd_hyb_1771632295832877/Desktop/code/cmu15445/build_debug /home/ecd_hyb_1771632295832877/Desktop/code/cmu15445/build_debug/CMakeFiles/check-clang-tidy.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/ecd_hyb_1771632295832877/Desktop/code/cmu15-445/build_debug && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/ecd_hyb_1771632295832877/Desktop/code/cmu15-445 /home/ecd_hyb_1771632295832877/Desktop/code/cmu15-445 /home/ecd_hyb_1771632295832877/Desktop/code/cmu15-445/build_debug /home/ecd_hyb_1771632295832877/Desktop/code/cmu15-445/build_debug /home/ecd_hyb_1771632295832877/Desktop/code/cmu15-445/build_debug/CMakeFiles/check-clang-tidy.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : CMakeFiles/check-clang-tidy.dir/depend
 
