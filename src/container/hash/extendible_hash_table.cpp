@@ -100,11 +100,11 @@ auto HASH_TABLE_TYPE::GetValue(Transaction *transaction, const KeyType &key, std
  *****************************************************************************/
 template <typename KeyType, typename ValueType, typename KeyComparator>
 auto HASH_TABLE_TYPE::Insert(Transaction *transaction, const KeyType &key, const ValueType &value) -> bool {
-  table_latch_.WLock();
+  table_latch_.RLock();
   HashTableDirectoryPage *dir_page = FetchDirectoryPage();
   reinterpret_cast<Page *>(dir_page)->RLatch();
   uint32_t bucket_id = KeyToDirectoryIndex(key, dir_page);
-  page_id_t bucket_page_id = dir_page->GetLocalDepth(bucket_id);
+  page_id_t bucket_page_id = dir_page->GetBucketPageId(bucket_id);
   HASH_TABLE_BUCKET_TYPE *bucket_page = FetchBucketPage(bucket_page_id);
   reinterpret_cast<Page *>(bucket_page)->WLatch();
   // LOG_INFO("insert to bucket %d page %d", KeyToDirectoryIndex(key, dir_page), bucket_page_id);
@@ -113,13 +113,9 @@ auto HASH_TABLE_TYPE::Insert(Transaction *transaction, const KeyType &key, const
     LOG_INFO("bucket %d is full try to split", KeyToDirectoryIndex(key, dir_page));
     buffer_pool_manager_->UnpinPage(directory_page_id_, false);
     buffer_pool_manager_->UnpinPage(bucket_page_id, false);
-<<<<<<< Updated upstream
     uint32_t ori_global_depth = dir_page->GetGlobalDepth();
     uint8_t ori_local_depth = dir_page->GetLocalDepth(bucket_id);
     table_latch_.RUnlock();
-=======
-    table_latch_.WUnlock();
->>>>>>> Stashed changes
     reinterpret_cast<Page *>(dir_page)->RUnlatch();
 
     table_latch_.WLock();
@@ -138,13 +134,13 @@ auto HASH_TABLE_TYPE::Insert(Transaction *transaction, const KeyType &key, const
     buffer_pool_manager_->UnpinPage(bucket_page_id, false);
     reinterpret_cast<Page *>(dir_page)->RUnlatch();
     reinterpret_cast<Page *>(bucket_page)->WUnlatch();
-    table_latch_.WUnlock();
+    table_latch_.RUnlock();
     return false;
   }
 
   buffer_pool_manager_->UnpinPage(directory_page_id_, false);
   buffer_pool_manager_->UnpinPage(bucket_page_id, true);
-  table_latch_.WUnlock();
+  table_latch_.RUnlock();
   reinterpret_cast<Page *>(dir_page)->RUnlatch();
   reinterpret_cast<Page *>(bucket_page)->WUnlatch();
   return true;
@@ -228,7 +224,7 @@ auto HASH_TABLE_TYPE::SplitInsert(Transaction *transaction, const KeyType &key, 
  *****************************************************************************/
 template <typename KeyType, typename ValueType, typename KeyComparator>
 auto HASH_TABLE_TYPE::Remove(Transaction *transaction, const KeyType &key, const ValueType &value) -> bool {
-  table_latch_.WLock();
+  table_latch_.RLock();
   HashTableDirectoryPage *dir_page = FetchDirectoryPage();
   reinterpret_cast<Page *>(dir_page)->RLatch();
   uint32_t bucket_id = KeyToDirectoryIndex(key ,dir_page);
@@ -238,7 +234,7 @@ auto HASH_TABLE_TYPE::Remove(Transaction *transaction, const KeyType &key, const
   if (!bucket_page->Remove(key, value, comparator_)) {
     buffer_pool_manager_->UnpinPage(directory_page_id_, false);
     buffer_pool_manager_->UnpinPage(bucket_page_id, false);
-    table_latch_.WUnlock();
+    table_latch_.RUnlock();
     reinterpret_cast<Page *>(dir_page)->RUnlatch();
     reinterpret_cast<Page *>(bucket_page)->WUnlatch();
     return false;
@@ -247,13 +243,9 @@ auto HASH_TABLE_TYPE::Remove(Transaction *transaction, const KeyType &key, const
     LOG_INFO("bucket %d is empty try to merge", KeyToDirectoryIndex(key, dir_page));
     buffer_pool_manager_->UnpinPage(directory_page_id_, false);
     buffer_pool_manager_->UnpinPage(bucket_page_id, true);
-<<<<<<< Updated upstream
     uint32_t ori_global_depth = dir_page->GetGlobalDepth();
     uint8_t ori_local_depth = dir_page->GetLocalDepth(bucket_id);
     table_latch_.RUnlock();
-=======
-    table_latch_.WUnlock();
->>>>>>> Stashed changes
     reinterpret_cast<Page *>(dir_page)->RUnlatch();
     reinterpret_cast<Page *>(bucket_page)->WUnlatch();
 
@@ -270,7 +262,7 @@ auto HASH_TABLE_TYPE::Remove(Transaction *transaction, const KeyType &key, const
   }
   buffer_pool_manager_->UnpinPage(directory_page_id_, false);
   buffer_pool_manager_->UnpinPage(bucket_page_id, true);
-  table_latch_.WUnlock();
+  table_latch_.RUnlock();
   reinterpret_cast<Page *>(dir_page)->RUnlatch();
   reinterpret_cast<Page *>(bucket_page)->WUnlatch();
   return true;
