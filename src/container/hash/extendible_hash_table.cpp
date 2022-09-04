@@ -110,39 +110,42 @@ auto HASH_TABLE_TYPE::Insert(Transaction *transaction, const KeyType &key, const
   // LOG_INFO("insert to bucket %d page %d", KeyToDirectoryIndex(key, dir_page), bucket_page_id);
   // bucket full
   if (bucket_page->IsFull()) {
-    LOG_INFO("bucket %d is full try to split", KeyToDirectoryIndex(key, dir_page));
-    buffer_pool_manager_->UnpinPage(directory_page_id_, false);
-    buffer_pool_manager_->UnpinPage(bucket_page_id, false);
+    // LOG_INFO("bucket %d is full try to split", KeyToDirectoryIndex(key, dir_page));
     uint32_t ori_global_depth = dir_page->GetGlobalDepth();
     uint8_t ori_local_depth = dir_page->GetLocalDepth(bucket_id);
-    table_latch_.RUnlock();
+    buffer_pool_manager_->UnpinPage(bucket_page_id, false);
+    reinterpret_cast<Page *>(bucket_page)->WUnlatch();
+    buffer_pool_manager_->UnpinPage(directory_page_id_, false);
     reinterpret_cast<Page *>(dir_page)->RUnlatch();
+    table_latch_.RUnlock();
 
     table_latch_.WLock();
     reinterpret_cast<Page *>(dir_page)->WLatch();
-    if (ori_global_depth == dir_page->GetGlobalDepth() && ori_local_depth == dir_page->GetLocalDepth(bucket_id))
-    {
+    // reinterpret_cast<Page *>(bucket_page)->WLatch();
+    if (ori_global_depth == dir_page->GetGlobalDepth() && ori_local_depth == dir_page->GetLocalDepth(bucket_id)) {
       return SplitInsert(transaction, key, value);
     }
-    table_latch_.WUnlock();
+    LOG_DEBUG("during acquire table W Lock global/local depth changed");
+    // reinterpret_cast<Page *>(bucket_page)->WUnlatch();
     reinterpret_cast<Page *>(dir_page)->WUnlatch();
+    table_latch_.WUnlock();
     return Insert(transaction, key, value);
   }
   if (!bucket_page->Insert(key, value, comparator_)) {
-    //LOG_INFO("same key value pair");
+    // LOG_INFO("same key value pair");
     buffer_pool_manager_->UnpinPage(directory_page_id_, false);
     buffer_pool_manager_->UnpinPage(bucket_page_id, false);
-    reinterpret_cast<Page *>(dir_page)->RUnlatch();
     reinterpret_cast<Page *>(bucket_page)->WUnlatch();
+    reinterpret_cast<Page *>(dir_page)->RUnlatch();
     table_latch_.RUnlock();
     return false;
   }
 
   buffer_pool_manager_->UnpinPage(directory_page_id_, false);
   buffer_pool_manager_->UnpinPage(bucket_page_id, true);
-  table_latch_.RUnlock();
-  reinterpret_cast<Page *>(dir_page)->RUnlatch();
   reinterpret_cast<Page *>(bucket_page)->WUnlatch();
+  reinterpret_cast<Page *>(dir_page)->RUnlatch();
+  table_latch_.RUnlock();
   return true;
 }
 
@@ -185,6 +188,7 @@ auto HASH_TABLE_TYPE::SplitInsert(Transaction *transaction, const KeyType &key, 
   // dir_page->PrintDirectory();
   //  split items
   HASH_TABLE_BUCKET_TYPE *page = FetchBucketPage(bucket_page_id);
+  reinterpret_cast<Page *>(page)->WLatch();
   HASH_TABLE_BUCKET_TYPE *new_page = reinterpret_cast<HASH_TABLE_BUCKET_TYPE *>(new_pg->GetData());
   new_pg->WLatch();
   for (size_t i = 0; i < BUCKET_ARRAY_SIZE; i++) {
@@ -212,10 +216,10 @@ auto HASH_TABLE_TYPE::SplitInsert(Transaction *transaction, const KeyType &key, 
   buffer_pool_manager_->UnpinPage(bucket_page_id, true);
   buffer_pool_manager_->UnpinPage(directory_page_id_, true);
   buffer_pool_manager_->UnpinPage(new_page_id, true);
-  table_latch_.WUnlock();
-  reinterpret_cast<Page *>(dir_page)->WUnlatch();
-  new_pg->WUnlatch();
   reinterpret_cast<Page *>(page)->WUnlatch();
+  new_pg->WUnlatch();
+  reinterpret_cast<Page *>(dir_page)->WUnlatch();
+  table_latch_.WUnlock();
   return true;
 }
 
@@ -227,16 +231,16 @@ auto HASH_TABLE_TYPE::Remove(Transaction *transaction, const KeyType &key, const
   table_latch_.RLock();
   HashTableDirectoryPage *dir_page = FetchDirectoryPage();
   reinterpret_cast<Page *>(dir_page)->RLatch();
-  uint32_t bucket_id = KeyToDirectoryIndex(key ,dir_page);
+  uint32_t bucket_id = KeyToDirectoryIndex(key, dir_page);
   page_id_t bucket_page_id = dir_page->GetBucketPageId(bucket_id);
   HASH_TABLE_BUCKET_TYPE *bucket_page = FetchBucketPage(bucket_page_id);
   reinterpret_cast<Page *>(bucket_page)->WLatch();
   if (!bucket_page->Remove(key, value, comparator_)) {
     buffer_pool_manager_->UnpinPage(directory_page_id_, false);
     buffer_pool_manager_->UnpinPage(bucket_page_id, false);
-    table_latch_.RUnlock();
-    reinterpret_cast<Page *>(dir_page)->RUnlatch();
     reinterpret_cast<Page *>(bucket_page)->WUnlatch();
+    reinterpret_cast<Page *>(dir_page)->RUnlatch();
+    table_latch_.RUnlock();
     return false;
   }
   if (bucket_page->IsEmpty()) {
@@ -245,26 +249,26 @@ auto HASH_TABLE_TYPE::Remove(Transaction *transaction, const KeyType &key, const
     buffer_pool_manager_->UnpinPage(bucket_page_id, true);
     uint32_t ori_global_depth = dir_page->GetGlobalDepth();
     uint8_t ori_local_depth = dir_page->GetLocalDepth(bucket_id);
-    table_latch_.RUnlock();
-    reinterpret_cast<Page *>(dir_page)->RUnlatch();
     reinterpret_cast<Page *>(bucket_page)->WUnlatch();
+    reinterpret_cast<Page *>(dir_page)->RUnlatch();
+    table_latch_.RUnlock();
 
     table_latch_.WLock();
     reinterpret_cast<Page *>(dir_page)->WLatch();
-    if (ori_global_depth == dir_page->GetGlobalDepth() && ori_local_depth == dir_page->GetLocalDepth(bucket_id))
-    {
+    if (ori_global_depth == dir_page->GetGlobalDepth() && ori_local_depth == dir_page->GetLocalDepth(bucket_id)) {
       Merge(transaction, key, value);
       return true;
     }
-    table_latch_.WUnlock();
+    LOG_DEBUG("during require W Lock global/local depth changed");
     reinterpret_cast<Page *>(dir_page)->WUnlatch();
+    table_latch_.WUnlock();
     return Remove(transaction, key, value);
   }
   buffer_pool_manager_->UnpinPage(directory_page_id_, false);
   buffer_pool_manager_->UnpinPage(bucket_page_id, true);
-  table_latch_.RUnlock();
-  reinterpret_cast<Page *>(dir_page)->RUnlatch();
   reinterpret_cast<Page *>(bucket_page)->WUnlatch();
+  reinterpret_cast<Page *>(dir_page)->RUnlatch();
+  table_latch_.RUnlock();
   return true;
 }
 
@@ -283,12 +287,12 @@ void HASH_TABLE_TYPE::Merge(Transaction *transaction, const KeyType &key, const 
     buffer_pool_manager_->UnpinPage(directory_page_id_, false);
     buffer_pool_manager_->UnpinPage(bucket_page_id, false);
     buffer_pool_manager_->UnpinPage(image_bucket_page_id, false);
-    table_latch_.WUnlock();
     reinterpret_cast<Page *>(dir_page)->WUnlatch();
+    table_latch_.WUnlock();
     return;
   }
-  LOG_DEBUG("successful merge bucket %d and image %d now local depth %d", 
-  bucket_id, image_bucket_id, dir_page->GetLocalDepth(bucket_id));
+  LOG_DEBUG("successful merge bucket %d and image %d now local depth %d", bucket_id, image_bucket_id,
+            dir_page->GetLocalDepth(bucket_id));
   // dir_page->PrintDirectory();
   // shrink
 SHRINK:
@@ -309,8 +313,8 @@ SHRINK:
     goto SHRINK;
   }
   buffer_pool_manager_->UnpinPage(directory_page_id_, true);
-  table_latch_.WUnlock();
   reinterpret_cast<Page *>(dir_page)->WUnlatch();
+  table_latch_.WUnlock();
 }
 
 /*****************************************************************************
