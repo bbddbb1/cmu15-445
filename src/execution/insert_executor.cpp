@@ -33,8 +33,8 @@ void InsertExecutor::Insert(Tuple *tuple, RID *rid){
 	TableHeap *table_heap = table_info_->table_.get();
 	table_heap->InsertTuple(*tuple, rid, exec_ctx_->GetTransaction());
 	for (auto &index_info: index_info_) {
-		HASH_TABLE_INDEX_TYPE *hash_index = reinterpret_cast<HASH_TABLE_INDEX_TYPE*>(index_info->index_.get());
-		hash_index->InsertEntry(tuple->KeyFromTuple(table_info_->schema_, index_info->key_schema_, index_info->index_->GetKeyAttrs()),
+		// HASH_TABLE_INDEX_TYPE *hash_index = reinterpret_cast<HASH_TABLE_INDEX_TYPE*>(index_info->index_.get());
+		index_info->index_->InsertEntry(tuple->KeyFromTuple(table_info_->schema_, index_info->key_schema_, index_info->index_->GetKeyAttrs()),
 			*rid, exec_ctx_->GetTransaction());
 	}
 }
