@@ -29,7 +29,6 @@ class TableIterator {
   friend class Cursor;
 
  public:
-  TableIterator() = default;
   TableIterator(TableHeap *table_heap, RID rid, Transaction *txn);
 
   TableIterator(const TableIterator &other)
