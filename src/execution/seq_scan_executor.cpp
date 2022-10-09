@@ -14,18 +14,18 @@
 
 namespace bustub {
 
-SeqScanExecutor::SeqScanExecutor(ExecutorContext *exec_ctx, const SeqScanPlanNode *plan) : AbstractExecutor(exec_ctx), plan_(plan) {
-}
+SeqScanExecutor::SeqScanExecutor(ExecutorContext *exec_ctx, const SeqScanPlanNode *plan) 
+: AbstractExecutor(exec_ctx), plan_(plan) {}
 
 void SeqScanExecutor::Init() {
     table_info_ = exec_ctx_->GetCatalog()->GetTable(plan_->GetTableOid());
-    iter_ = &table_info_->table_->Begin(exec_ctx_->GetTransaction());
-    table_end_ = &table_info_->table_->End();
+    iter_ = table_info_->table_->Begin(exec_ctx_->GetTransaction());
+    table_end_ = table_info_->table_->End();
 }
 
 auto SeqScanExecutor::Next(Tuple *tuple, RID *rid) -> bool { 
     for(; iter_ != table_end_; iter_++){
-        *tuple = **iter_;
+        *tuple = *iter_;
         *rid = tuple->GetRid();
         if(plan_->GetPredicate() != nullptr){
             if (plan_->GetPredicate()->Evaluate(tuple, GetOutputSchema()).GetAs<bool>()){
