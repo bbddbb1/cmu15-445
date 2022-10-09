@@ -62,7 +62,7 @@ class InsertExecutor : public AbstractExecutor {
   std::unique_ptr<AbstractExecutor> child_executor_;
   TableInfo *table_info_;
   std::vector<bustub::IndexInfo *> index_info_;
-  void InsertExecutor::Insert(Tuple *tuple, RID *rid);
+  void Insert(Tuple *tuple, RID *rid);
   std::vector<std::vector<bustub::Value>>::const_iterator iter_;
 };
 

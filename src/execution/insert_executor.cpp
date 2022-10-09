@@ -47,7 +47,8 @@ auto InsertExecutor::Next([[maybe_unused]] Tuple *tuple, RID *rid) -> bool {
 		return false;
 	}
 	if (iter_ != plan_->RawValues().end()){
-		Insert(&Tuple{*iter_++, &table_info_->schema_}, rid);
+		*tuple = Tuple(*iter_++, &table_info_->schema_);
+		Insert(tuple, rid);
 		return true;
 	}
 	return false;
