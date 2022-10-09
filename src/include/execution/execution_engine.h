@@ -66,7 +66,6 @@ class ExecutionEngine {
       }
     } catch (Exception &e) {
       // TODO(student): handle exceptions
-      LOG_ERROR(e.what());
     }
 
     return true;
