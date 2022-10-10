@@ -329,7 +329,7 @@ TEST_F(ExecutorTest, SimpleUpdateTest) {
 }
 
 // DELETE FROM test_1 WHERE col_a == 50;
-TEST_F(ExecutorTest, impleDeleteTest) {
+TEST_F(ExecutorTest, SimpleDeleteTest) {
   // Construct query plan
   auto table_info = GetExecutorContext()->GetCatalog()->GetTable("test_1");
   auto &schema = table_info->schema_;
@@ -356,7 +356,7 @@ TEST_F(ExecutorTest, impleDeleteTest) {
   }
 
   // DELETE FROM test_1 WHERE col_a == 50
-  const Tuple index_key = Tuple(result_set[0]);
+  Tuple index_key = Tuple(result_set[0]);
   std::unique_ptr<AbstractPlanNode> delete_plan;
   { delete_plan = std::make_unique<DeletePlanNode>(scan_plan1.get(), table_info->oid_); }
   GetExecutionEngine()->Execute(delete_plan.get(), nullptr, GetTxn(), GetExecutorContext());
@@ -367,11 +367,13 @@ TEST_F(ExecutorTest, impleDeleteTest) {
   GetExecutionEngine()->Execute(scan_plan1.get(), &result_set, GetTxn(), GetExecutorContext());
   ASSERT_TRUE(result_set.empty());
 
-  // Ensure the key was removed from the index
-  std::vector<RID> rids{};
   auto scan_key = index_key.KeyFromTuple(GetExecutorContext()->GetCatalog()->GetTable("test_1")->schema_,
                                            index_info->key_schema_, index_info->index_->GetKeyAttrs());
-  index_info->index_->ScanKey(scan_key, &rids, GetTxn());
+
+index_info->index_->ScanKey(scan_key, &rids, GetTxn());
+  // Ensure the key was removed from the index
+  std::vector<RID> rids{};
+  index_info->index_->ScanKey(index_key, &rids, GetTxn());
   ASSERT_TRUE(rids.empty());
 }
 
