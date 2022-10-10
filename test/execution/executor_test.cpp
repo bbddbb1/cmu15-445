@@ -373,7 +373,7 @@ TEST_F(ExecutorTest, SimpleDeleteTest) {
   // Ensure the key was removed from the index
   std::vector<RID> rids{};
 
-  index_info->index_->ScanKey(index_key, &rids, GetTxn());
+  index_info->index_->ScanKey(scan_key, &rids, GetTxn());
   ASSERT_TRUE(rids.empty());
 }
 
