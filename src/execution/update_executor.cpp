@@ -27,10 +27,12 @@ void UpdateExecutor::Init() {
 auto UpdateExecutor::Next([[maybe_unused]] Tuple *tuple, RID *rid) -> bool { 
   if(child_executor_->Next(tuple, rid)){
     Tuple updated_tuple = GenerateUpdatedTuple(*tuple);
-    if(!table_info_->table_->UpdateTuple(updated_tuple, *rid, exec_ctx_->GetTransaction())){
-      throw Exception("update err");
+    if(table_info_->table_->UpdateTuple(updated_tuple, *rid, exec_ctx_->GetTransaction())){
+      table_info_->table_->GetTuple(*rid, tuple, exec_ctx_->GetTransaction());
+      return true; 
     }
-    return true;
+    throw Exception("update err");
+    
   }
   return false;
 }
