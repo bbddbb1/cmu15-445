@@ -51,7 +51,7 @@ class ExecutionEngine {
                ExecutorContext *exec_ctx) -> bool {
     // Construct and executor for the plan
     auto executor = ExecutorFactory::CreateExecutor(exec_ctx, plan);
-
+    auto plan_type = plan->GetType();
     // Prepare the root executor
     executor->Init();
 
