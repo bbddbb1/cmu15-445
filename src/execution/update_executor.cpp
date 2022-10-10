@@ -26,7 +26,7 @@ void UpdateExecutor::Init() {
 }
 
 auto UpdateExecutor::Next([[maybe_unused]] Tuple *tuple, RID *rid) -> bool { 
-  Tuple *old_tuple;
+  Tuple *old_tuple = new Tuple;
   if(child_executor_->Next(old_tuple, rid)){
     Tuple updated_tuple = GenerateUpdatedTuple(*old_tuple);
     if(table_info_->table_->UpdateTuple(updated_tuple, *rid, exec_ctx_->GetTransaction())){
