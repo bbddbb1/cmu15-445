@@ -18,21 +18,27 @@ namespace bustub {
 UpdateExecutor::UpdateExecutor(ExecutorContext *exec_ctx, const UpdatePlanNode *plan,
                                std::unique_ptr<AbstractExecutor> &&child_executor)
     : AbstractExecutor(exec_ctx), plan_(plan), table_info_(exec_ctx->GetCatalog()->GetTable(plan->TableOid())),
-    child_executor_(std::move(child_executor)){}
+    child_executor_(std::move(child_executor)), 
+    index_info_(exec_ctx_->GetCatalog()->GetTableIndexes(table_info_->name_)){}
 
 void UpdateExecutor::Init() {
   child_executor_->Init();
 }
 
 auto UpdateExecutor::Next([[maybe_unused]] Tuple *tuple, RID *rid) -> bool { 
-  if(child_executor_->Next(tuple, rid)){
-    Tuple updated_tuple = GenerateUpdatedTuple(*tuple);
+  Tuple *old_tuple;
+  if(child_executor_->Next(old_tuple, rid)){
+    Tuple updated_tuple = GenerateUpdatedTuple(*old_tuple);
     if(table_info_->table_->UpdateTuple(updated_tuple, *rid, exec_ctx_->GetTransaction())){
-      table_info_->table_->GetTuple(*rid, tuple, exec_ctx_->GetTransaction());
+      for(auto index_info : index_info_){
+        auto new_key = updated_tuple.KeyFromTuple(table_info_->schema_, index_info->key_schema_, index_info->index_->GetKeyAttrs());
+        auto old_key = old_tuple->KeyFromTuple(table_info_->schema_, index_info->key_schema_, index_info->index_->GetKeyAttrs());
+        index_info->index_->DeleteEntry(old_key, *rid, exec_ctx_->GetTransaction());
+        index_info->index_->InsertEntry(new_key, *rid, exec_ctx_->GetTransaction());
+      }
       return true; 
     }
     throw Exception("update err");
-    
   }
   return false;
 }
