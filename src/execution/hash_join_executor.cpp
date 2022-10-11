@@ -37,7 +37,8 @@ void HashJoinExecutor::Init() {
     if (hash.count(key) > 0) {
       hash[key].emplace_back(std::move(left_tuple_));
     } else {
-      hash.emplace(key, std::vector<Tuple>{left_tuple_});
+			std::vector<Tuple> temp = {left_tuple_};
+      hash.emplace(key, std::move(temp));
     }
   }
   left_tuple_buffer_.clear();
