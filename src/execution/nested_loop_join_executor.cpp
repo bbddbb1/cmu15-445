@@ -31,27 +31,27 @@ void NestedLoopJoinExecutor::Init() {
 auto NestedLoopJoinExecutor::Next(Tuple *tuple, RID *rid) -> bool {
   Tuple inner_tuple;
   RID inner_id;
-	for(;;){
-		if (!right_executor_->Next(&inner_tuple, &inner_id)) {
-			if (!left_executor_->Next(&outer_tuple_, &outer_id_)) return false;
-			right_executor_->Init();
-			assert(right_executor_->Next(&inner_tuple, &inner_id));
-		}
-		if (plan_->Predicate() != nullptr && !plan_->Predicate()
-																							->EvaluateJoin(&outer_tuple_, plan_->GetLeftPlan()->OutputSchema(),
-																														&inner_tuple, plan_->GetRightPlan()->OutputSchema())
-																							.GetAs<bool>()) {
-			continue;
-		}
-		std::vector<Value> values;
-		for (const auto &column : plan_->OutputSchema()->GetColumns()) {
-			values.emplace_back(column.GetExpr()->EvaluateJoin(&outer_tuple_, plan_->GetLeftPlan()->OutputSchema(),
-																												&inner_tuple, plan_->GetRightPlan()->OutputSchema()));
-		}
-		*tuple = Tuple(values, GetOutputSchema());
-		*rid = tuple->GetRid();
-		return true;		
-	}
+  for (;;) {
+    if (!right_executor_->Next(&inner_tuple, &inner_id)) {
+      if (!left_executor_->Next(&outer_tuple_, &outer_id_)) return false;
+      right_executor_->Init();
+      assert(right_executor_->Next(&inner_tuple, &inner_id));
+    }
+    if (plan_->Predicate() != nullptr && !plan_->Predicate()
+                                              ->EvaluateJoin(&outer_tuple_, plan_->GetLeftPlan()->OutputSchema(),
+                                                             &inner_tuple, plan_->GetRightPlan()->OutputSchema())
+                                              .GetAs<bool>()) {
+      continue;
+    }
+    std::vector<Value> values;
+    for (const auto &column : plan_->OutputSchema()->GetColumns()) {
+      values.emplace_back(column.GetExpr()->EvaluateJoin(&outer_tuple_, plan_->GetLeftPlan()->OutputSchema(),
+                                                         &inner_tuple, plan_->GetRightPlan()->OutputSchema()));
+    }
+    *tuple = Tuple(values, GetOutputSchema());
+    *rid = tuple->GetRid();
+    return true;
+  }
 }
 
 }  // namespace bustub
