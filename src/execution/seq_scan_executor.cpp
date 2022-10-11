@@ -29,7 +29,9 @@ void SeqScanExecutor::Init() {
 auto SeqScanExecutor::Next(Tuple *tuple, RID *rid) -> bool { 
     while(iter_ != table_end_){
         auto temp = iter_++;
-        if(plan_->GetPredicate() == nullptr || plan_->GetPredicate()->Evaluate(&*temp, GetOutputSchema()).GetAs<bool>()){
+        if(plan_->GetPredicate() == nullptr)
+            return false;
+        if(plan_->GetPredicate()->Evaluate(&*temp, GetOutputSchema()).GetAs<bool>()){
             std::vector<Value> values;
             for(auto colidx : ColIdx_){
                 values.emplace_back(temp->GetValue(&table_info_->schema_, colidx));
