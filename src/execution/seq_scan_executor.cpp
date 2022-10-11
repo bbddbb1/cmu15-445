@@ -26,8 +26,11 @@ void SeqScanExecutor::Init() {
 auto SeqScanExecutor::Next(Tuple *tuple, RID *rid) -> bool { 
     while(iter_ != table_end_){
         auto temp = iter_++;
-        if(plan_->GetPredicate() == nullptr)
-            return true;
+        if(plan_->GetPredicate() != nullptr)
+            return false;
+        if(!plan_->GetPredicate()->Evaluate(&(*temp), &table_info_->schema_).GetAs<bool>()){
+            continue;
+        }
         std::vector<Value> values;
         for (const auto &column : plan_->OutputSchema()->GetColumns()) {
             values.emplace_back(column.GetExpr()->Evaluate(&(*temp), &table_info_->schema_));
