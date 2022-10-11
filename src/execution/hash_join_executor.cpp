@@ -65,10 +65,11 @@ auto HashJoinExecutor::Next(Tuple *tuple, RID *rid) -> bool {
   std::vector<Value> values;
   //   Tuple temp(key_value->second, GetOutputSchema());
   for (const auto &column : plan_->OutputSchema()->GetColumns()) {
-    values.emplace_back(column.GetExpr()->EvaluateJoin(&left_tuple_buffer_[bucket_cur_++],
+    values.emplace_back(column.GetExpr()->EvaluateJoin(&left_tuple_buffer_[bucket_cur_],
                                                        plan_->GetLeftPlan()->OutputSchema(), &right_tuple,
                                                        plan_->GetRightPlan()->OutputSchema()));
   }
+	bucket_cur_++;
   *tuple = Tuple(values, GetOutputSchema());
   *rid = tuple->GetRid();
   return true;
