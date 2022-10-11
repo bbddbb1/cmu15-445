@@ -22,6 +22,25 @@
 #include "common/util/hash_util.h"
 
 namespace bustub {
+struct JoinKey {
+  Value value;
+  bool operator==(const JoinKey &other) const { return value.CompareEquals(other.value) == CmpBool::CmpTrue; }
+};
+}  // namespace bustub
+
+namespace std {
+template <>
+struct hash<bustub::JoinKey> {
+  std::size_t operator()(const bustub::JoinKey &agg_key) const {
+    size_t curr_hash = 0;
+    if (!agg_key.value.IsNull()) {
+      curr_hash = bustub::HashUtil::CombineHashes(curr_hash, bustub::HashUtil::HashValue(&agg_key.value));
+    }
+    return curr_hash;
+  }
+};
+}  // namespace std
+namespace bustub {
 
 /**
  * HashJoinExecutor executes a nested-loop JOIN on two tables.
@@ -56,7 +75,7 @@ class HashJoinExecutor : public AbstractExecutor {
   /** The NestedLoopJoin plan node to be executed. */
   const HashJoinPlanNode *plan_;
 
-  std::unordered_map<JoinKey, std::vector<Tuple>> hash;
+  std::unordered_map<JoinKey, std::vector<Tuple> > hash;
 
   std::unique_ptr<AbstractExecutor> left_child_;
 
@@ -70,23 +89,3 @@ class HashJoinExecutor : public AbstractExecutor {
 };
 
 }  // namespace bustub
-
-namespace bustub {
-struct JoinKey {
-  Value value;
-  bool operator==(const JoinKey &other) const { return value.CompareEquals(other.value) == CmpBool::CmpTrue; }
-};
-}  // namespace bustub
-
-namespace std {
-template <>
-struct hash<bustub::JoinKey> {
-  std::size_t operator()(const bustub::JoinKey &agg_key) const {
-    size_t curr_hash = 0;
-    if (!agg_key.value.IsNull()) {
-      curr_hash = bustub::HashUtil::CombineHashes(curr_hash, bustub::HashUtil::HashValue(&agg_key.value));
-    }
-    return curr_hash;
-  }
-};
-}  // namespace std
