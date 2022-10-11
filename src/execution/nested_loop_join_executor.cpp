@@ -36,7 +36,7 @@ auto NestedLoopJoinExecutor::Next(Tuple *tuple, RID *rid) -> bool {
 		if(!left_executor_->Next(&outer_tuple_, &outer_id_))
 			return false;
 		right_executor_->Init();
-		right_executor_->Next(&inner_tuple, &inner_id);
+		assert(right_executor_->Next(&inner_tuple, &inner_id));
 	}
 	std::vector<Value> values;
 	for (const auto &column : plan_->OutputSchema()->GetColumns()) {
