@@ -34,7 +34,7 @@ auto SeqScanExecutor::Next(Tuple *tuple, RID *rid) -> bool {
             values.emplace_back(column.GetExpr()->Evaluate(&(*temp), &table_info_->schema_));
         }
         *tuple = Tuple(values, GetOutputSchema());
-        *rid = tuple->GetRid();
+        *rid = temp->GetRid();
         return true;
     }
     return false;
