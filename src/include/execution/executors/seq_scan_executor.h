@@ -53,6 +53,7 @@ class SeqScanExecutor : public AbstractExecutor {
   TableInfo *table_info_; //要遍历的表的信息
   TableIterator iter_;  //table_heap_的迭代器
   TableIterator table_end_;
+  std::vector<uint32_t> ColIdx_;
 
 };
 }  // namespace bustub

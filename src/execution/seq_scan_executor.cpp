@@ -19,20 +19,27 @@ SeqScanExecutor::SeqScanExecutor(ExecutorContext *exec_ctx, const SeqScanPlanNod
     iter_(table_info_->table_->Begin(exec_ctx_->GetTransaction())), table_end_(table_info_->table_->End()) {}
 
 void SeqScanExecutor::Init() {
+    for(auto column : plan_->OutputSchema()->GetColumns()){
+        ColIdx_.emplace_back(plan_->OutputSchema()->GetColIdx(column.GetName()));
+    }
+    iter_ = table_info_->table_->Begin(exec_ctx_->GetTransaction());
 }
 
 auto SeqScanExecutor::Next(Tuple *tuple, RID *rid) -> bool { 
     for(; iter_ != table_end_; iter_++){
-        *tuple = *iter_;
-        *rid = tuple->GetRid();
+        auto temp = iter_++;
         if(plan_->GetPredicate() != nullptr){
             if (plan_->GetPredicate()->Evaluate(tuple, GetOutputSchema()).GetAs<bool>()){
-                iter_++;
+                std::vector<Value> values;
+                for(auto colidx : ColIdx_){
+                    values.emplace_back(temp->GetValue(&table_info_->schema_, colidx));
+                }
+                *tuple = Tuple(values, GetOutputSchema());
+                *rid = tuple->GetRid();
                 return true;
             }
         }else{
-            iter_++;
-            return true;
+            throw Exception("predicate not exist");
         }
     }
     return false;
