@@ -25,7 +25,6 @@ AggregationExecutor::AggregationExecutor(ExecutorContext *exec_ctx, const Aggreg
       aht_iterator_(aht_.Begin()) {}
 
 void AggregationExecutor::Init() {
-  aht_iterator_ = aht_.Begin();
   child_->Init();
   Tuple tuple;
   RID rid;
@@ -34,6 +33,7 @@ void AggregationExecutor::Init() {
     auto value = MakeAggregateValue(&tuple);
     aht_.InsertCombine(key, value);
   }
+  aht_iterator_ = aht_.Begin();
 }
 
 auto AggregationExecutor::Next(Tuple *tuple, RID *rid) -> bool {
