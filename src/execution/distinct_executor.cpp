@@ -26,8 +26,11 @@ void DistinctExecutor::Init() {
 auto DistinctExecutor::Next(Tuple *tuple, RID *rid) -> bool { 
     while(child_executor_->Next(tuple, rid)){
         std::vector<Value> values;
-        for (const auto &column : plan_->OutputSchema()->GetColumns()){
-            values.emplace_back(column.GetExpr()->Evaluate(tuple, plan_->OutputSchema()));
+        // for (const auto &column : plan_->OutputSchema()->GetColumns()){
+        //     values.emplace_back(column.GetExpr()->Evaluate(tuple, plan_->OutputSchema()));
+        // }
+        for (uint32_t i = 0; i < plan_->OutputSchema()->GetColumnCount(); i++) {
+            values.emplace_back(tuple->GetValue(plan_->OutputSchema(), i));
         }
         DistinctKey key = {values};
         if (dht_.count(key) == 0)
