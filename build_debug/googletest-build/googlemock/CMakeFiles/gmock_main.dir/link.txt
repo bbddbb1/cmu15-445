@@ -1,1 +1,0 @@
-/usr/bin/c++ -fPIC  -O0 -Wall -g2 -ggdb  -shared -Wl,-soname,libgmock_main.so.1.12.1 -o ../../lib/libgmock_main.so.1.12.1 CMakeFiles/gmock_main.dir/src/gmock_main.cc.o  -Wl,-rpath,/home/ecd_hyb_1771632295832877/Desktop/code/cmu15-445/build_debug/lib: ../../lib/libgmock.so.1.12.1 ../../lib/libgtest.so.1.12.1 -lpthread 
