@@ -19,6 +19,7 @@
 #include "common/util/hash_util.h"
 #include "execution/executors/abstract_executor.h"
 #include "execution/plans/distinct_plan.h"
+#include "execution/expressions/abstract_expression.h"
 namespace bustub {
 
 struct DistinctKey {

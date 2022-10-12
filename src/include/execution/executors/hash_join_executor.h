@@ -21,6 +21,7 @@
 #include "execution/executors/abstract_executor.h"
 #include "execution/plans/hash_join_plan.h"
 #include "storage/table/tuple.h"
+#include "execution/expressions/abstract_expression.h"
 
 namespace bustub {
 struct JoinKey {

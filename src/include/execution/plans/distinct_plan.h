@@ -12,7 +12,7 @@
 
 #pragma once
 
-#include "execution/expressions/abstract_expression.h"
+
 #include "execution/plans/abstract_plan.h"
 
 namespace bustub {
