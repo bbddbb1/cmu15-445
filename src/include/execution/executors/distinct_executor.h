@@ -14,10 +14,11 @@
 
 #include <memory>
 #include <utility>
-
+#include <unordered_set>
+#include <vector>
+#include "common/util/hash_util.h"
 #include "execution/executors/abstract_executor.h"
 #include "execution/plans/distinct_plan.h"
-#include "common/util/hash_util.h"
 namespace bustub {
 
 struct DistinctKey {

@@ -14,12 +14,13 @@
 
 #include <memory>
 #include <utility>
-
+#include <vector>
+#include <unordered_map>
+#include "common/util/hash_util.h"
 #include "execution/executor_context.h"
 #include "execution/executors/abstract_executor.h"
 #include "execution/plans/hash_join_plan.h"
 #include "storage/table/tuple.h"
-#include "common/util/hash_util.h"
 
 namespace bustub {
 struct JoinKey {
@@ -81,11 +82,9 @@ class HashJoinExecutor : public AbstractExecutor {
 
   std::unique_ptr<AbstractExecutor> right_child_;
 
-
   size_t bucket_cur_;
 
   std::vector<Tuple> left_tuple_buffer_;
-
 };
 
 }  // namespace bustub

@@ -37,7 +37,7 @@ void HashJoinExecutor::Init() {
     if (hash.count(key) > 0) {
       hash[key].emplace_back(std::move(left_tuple_));
     } else {
-			std::vector<Tuple> temp = {left_tuple_};
+      std::vector<Tuple> temp = {left_tuple_};
       hash.emplace(key, std::move(temp));
     }
   }
@@ -48,7 +48,7 @@ auto HashJoinExecutor::Next(Tuple *tuple, RID *rid) -> bool {
   Tuple right_tuple;
   RID right_rid;
   if (bucket_cur_ >= left_tuple_buffer_.size()) {
-		bool find = false;
+    bool find = false;
     while (right_child_->Next(&right_tuple, &right_rid)) {
       auto value = plan_->LeftJoinKeyExpression()->Evaluate(&right_tuple, plan_->GetRightPlan()->OutputSchema());
       JoinKey key{value};
@@ -60,7 +60,7 @@ auto HashJoinExecutor::Next(Tuple *tuple, RID *rid) -> bool {
         break;
       }
     }
-		if (!find) return false;
+    if (!find) return false;
   }
   std::vector<Value> values;
   //   Tuple temp(key_value->second, GetOutputSchema());
@@ -69,7 +69,7 @@ auto HashJoinExecutor::Next(Tuple *tuple, RID *rid) -> bool {
                                                        plan_->GetLeftPlan()->OutputSchema(), &right_tuple,
                                                        plan_->GetRightPlan()->OutputSchema()));
   }
-	bucket_cur_++;
+  bucket_cur_++;
   *tuple = Tuple(values, GetOutputSchema());
   *rid = tuple->GetRid();
   return true;

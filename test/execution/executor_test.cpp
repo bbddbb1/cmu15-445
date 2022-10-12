@@ -368,7 +368,7 @@ TEST_F(ExecutorTest, SimpleDeleteTest) {
   ASSERT_TRUE(result_set.empty());
 
   auto scan_key = index_key.KeyFromTuple(GetExecutorContext()->GetCatalog()->GetTable("test_1")->schema_,
-                                           index_info->key_schema_, index_info->index_->GetKeyAttrs());
+                                         index_info->key_schema_, index_info->index_->GetKeyAttrs());
 
   // Ensure the key was removed from the index
   std::vector<RID> rids{};
