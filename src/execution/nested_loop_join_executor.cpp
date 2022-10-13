@@ -25,19 +25,21 @@ NestedLoopJoinExecutor::NestedLoopJoinExecutor(ExecutorContext *exec_ctx, const 
 void NestedLoopJoinExecutor::Init() {
   left_executor_->Init();
   right_executor_->Init();
-  left_executor_->Next(&outer_tuple_, &outer_id_);
+  outer_table_empty_ = left_executor_->Next(&outer_tuple_, &outer_id_);
 }
 
 auto NestedLoopJoinExecutor::Next(Tuple *tuple, RID *rid) -> bool {
+  if (!outer_table_empty_) {
+    return false;
+  }
   Tuple inner_tuple;
   RID inner_id;
   for (;;) {
-    if (!right_executor_->Next(&inner_tuple, &inner_id)) {
+    while (!right_executor_->Next(&inner_tuple, &inner_id)) {
       if (!left_executor_->Next(&outer_tuple_, &outer_id_)) {
         return false;
       }
       right_executor_->Init();
-      assert(right_executor_->Next(&inner_tuple, &inner_id));
     }
     if (plan_->Predicate() != nullptr && !plan_->Predicate()
                                               ->EvaluateJoin(&outer_tuple_, plan_->GetLeftPlan()->OutputSchema(),

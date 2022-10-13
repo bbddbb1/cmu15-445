@@ -86,6 +86,10 @@ class HashJoinExecutor : public AbstractExecutor {
   size_t bucket_cur_;
 
   std::vector<Tuple> left_tuple_buffer_;
+
+  Tuple right_tuple_;
+
+  RID right_rid_;
 };
 
 }  // namespace bustub

@@ -46,17 +46,16 @@ void HashJoinExecutor::Init() {
 }
 
 auto HashJoinExecutor::Next(Tuple *tuple, RID *rid) -> bool {
-  Tuple right_tuple;
-  RID right_rid;
   if (bucket_cur_ >= left_tuple_buffer_.size()) {
     bool find = false;
-    while (right_child_->Next(&right_tuple, &right_rid)) {
-      auto value = plan_->RightJoinKeyExpression()->Evaluate(&right_tuple, plan_->GetRightPlan()->OutputSchema());
+    while (right_child_->Next(&right_tuple_, &right_rid_)) {
+      auto value = plan_->RightJoinKeyExpression()->Evaluate(&right_tuple_, plan_->GetRightPlan()->OutputSchema());
       JoinKey key{value};
       auto key_value = hash_.find(key);
       if (key_value != hash_.end()) {
         bucket_cur_ = 0;
-        left_tuple_buffer_ = std::move(key_value->second);
+
+        left_tuple_buffer_ = key_value->second;
         find = true;
         break;
       }
@@ -67,10 +66,15 @@ auto HashJoinExecutor::Next(Tuple *tuple, RID *rid) -> bool {
   }
   std::vector<Value> values;
   //   Tuple temp(key_value->second, GetOutputSchema());
-  for (const auto &column : plan_->OutputSchema()->GetColumns()) {
-    values.emplace_back(column.GetExpr()->EvaluateJoin(&left_tuple_buffer_[bucket_cur_],
-                                                       plan_->GetLeftPlan()->OutputSchema(), &right_tuple,
-                                                       plan_->GetRightPlan()->OutputSchema()));
+  // for (const auto &column : plan_->OutputSchema()->GetColumns()) {
+  //   values.emplace_back(column.GetExpr()->EvaluateJoin(&left_tuple_buffer_[bucket_cur_],
+  //                                                      plan_->GetLeftPlan()->OutputSchema(), &right_tuple,
+  //                                                      plan_->GetRightPlan()->OutputSchema()));
+  // }
+  for (uint32_t i = 0; i < plan_->OutputSchema()->GetColumnCount(); i++) {
+    values.emplace_back(plan_->OutputSchema()->GetColumn(i).GetExpr()->EvaluateJoin(
+        &left_tuple_buffer_[bucket_cur_], plan_->GetLeftPlan()->OutputSchema(), &right_tuple_,
+        plan_->GetRightPlan()->OutputSchema()));
   }
   bucket_cur_++;
   *tuple = Tuple(values, GetOutputSchema());

@@ -62,6 +62,7 @@ class NestedLoopJoinExecutor : public AbstractExecutor {
 
   Tuple outer_tuple_;
   RID outer_id_;
+  bool outer_table_empty_;
 };
 
 }  // namespace bustub
