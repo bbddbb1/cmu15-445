@@ -33,7 +33,9 @@ auto NestedLoopJoinExecutor::Next(Tuple *tuple, RID *rid) -> bool {
   RID inner_id;
   for (;;) {
     if (!right_executor_->Next(&inner_tuple, &inner_id)) {
-      if (!left_executor_->Next(&outer_tuple_, &outer_id_)) return false;
+      if (!left_executor_->Next(&outer_tuple_, &outer_id_)) {
+        return false;
+      }
       right_executor_->Init();
       assert(right_executor_->Next(&inner_tuple, &inner_id));
     }

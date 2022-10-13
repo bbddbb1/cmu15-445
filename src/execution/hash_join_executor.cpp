@@ -23,22 +23,22 @@ HashJoinExecutor::HashJoinExecutor(ExecutorContext *exec_ctx, const HashJoinPlan
       right_child_(std::move(right_child)) {}
 
 void HashJoinExecutor::Init() {
-  Tuple left_tuple_;
-  RID left_id_;
+  Tuple left_tuple;
+  RID left_id;
   left_child_->Init();
   right_child_->Init();
-  while (left_child_->Next(&left_tuple_, &left_id_)) {
-    auto value = plan_->LeftJoinKeyExpression()->Evaluate(&left_tuple_, plan_->GetLeftPlan()->OutputSchema());
+  while (left_child_->Next(&left_tuple, &left_id)) {
+    auto value = plan_->LeftJoinKeyExpression()->Evaluate(&left_tuple, plan_->GetLeftPlan()->OutputSchema());
     JoinKey key{value};
     // std::vector<Value> values;
     // for (const auto &column : plan_->OutputSchema()->GetColumns()) {
     //   values.emplace_back(column.GetExpr()->Evaluate(&left_tuple_, plan_->GetLeftPlan()->OutputSchema()));
     // }
-    if (hash.count(key) > 0) {
-      hash[key].emplace_back(std::move(left_tuple_));
+    if (hash_.count(key) > 0) {
+      hash_[key].emplace_back(std::move(left_tuple));
     } else {
-      std::vector<Tuple> temp = {left_tuple_};
-      hash.emplace(key, std::move(temp));
+      std::vector<Tuple> temp = {left_tuple};
+      hash_.emplace(key, std::move(temp));
     }
   }
   left_tuple_buffer_.clear();
@@ -52,15 +52,17 @@ auto HashJoinExecutor::Next(Tuple *tuple, RID *rid) -> bool {
     while (right_child_->Next(&right_tuple, &right_rid)) {
       auto value = plan_->LeftJoinKeyExpression()->Evaluate(&right_tuple, plan_->GetRightPlan()->OutputSchema());
       JoinKey key{value};
-      auto key_value = hash.find(key);
-      if (key_value != hash.end()) {
+      auto key_value = hash_.find(key);
+      if (key_value != hash_.end()) {
         bucket_cur_ = 0;
         left_tuple_buffer_ = std::move(key_value->second);
         find = true;
         break;
       }
     }
-    if (!find) return false;
+    if (!find) {
+      return false;
+    }
   }
   std::vector<Value> values;
   //   Tuple temp(key_value->second, GetOutputSchema());

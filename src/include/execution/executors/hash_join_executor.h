@@ -13,20 +13,20 @@
 #pragma once
 
 #include <memory>
+#include <unordered_map>
 #include <utility>
 #include <vector>
-#include <unordered_map>
 #include "common/util/hash_util.h"
 #include "execution/executor_context.h"
 #include "execution/executors/abstract_executor.h"
+#include "execution/expressions/abstract_expression.h"
 #include "execution/plans/hash_join_plan.h"
 #include "storage/table/tuple.h"
-#include "execution/expressions/abstract_expression.h"
 
 namespace bustub {
 struct JoinKey {
-  Value value;
-  bool operator==(const JoinKey &other) const { return value.CompareEquals(other.value) == CmpBool::CmpTrue; }
+  Value value_;
+  bool operator==(const JoinKey &other) const { return value_.CompareEquals(other.value_) == CmpBool::CmpTrue; }
 };
 }  // namespace bustub
 
@@ -35,8 +35,8 @@ template <>
 struct hash<bustub::JoinKey> {
   std::size_t operator()(const bustub::JoinKey &agg_key) const {
     size_t curr_hash = 0;
-    if (!agg_key.value.IsNull()) {
-      curr_hash = bustub::HashUtil::CombineHashes(curr_hash, bustub::HashUtil::HashValue(&agg_key.value));
+    if (!agg_key.value_.IsNull()) {
+      curr_hash = bustub::HashUtil::CombineHashes(curr_hash, bustub::HashUtil::HashValue(&agg_key.value_));
     }
     return curr_hash;
   }
@@ -77,7 +77,7 @@ class HashJoinExecutor : public AbstractExecutor {
   /** The NestedLoopJoin plan node to be executed. */
   const HashJoinPlanNode *plan_;
 
-  std::unordered_map<JoinKey, std::vector<Tuple> > hash;
+  std::unordered_map<JoinKey, std::vector<Tuple> > hash_;
 
   std::unique_ptr<AbstractExecutor> left_child_;
 

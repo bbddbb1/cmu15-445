@@ -41,10 +41,12 @@ auto AggregationExecutor::Next(Tuple *tuple, RID *rid) -> bool {
     auto temp = aht_iterator_;
     ++aht_iterator_;
     if (plan_->GetHaving() != nullptr &&
-        !plan_->GetHaving()->EvaluateAggregate(temp.Key().group_bys_, temp.Val().aggregates_).GetAs<bool>())
+        !plan_->GetHaving()->EvaluateAggregate(temp.Key().group_bys_, temp.Val().aggregates_).GetAs<bool>()) {
       continue;
+    }
+
     std::vector<Value> values;
-    for (auto column : plan_->OutputSchema()->GetColumns()) {
+    for (auto &column : plan_->OutputSchema()->GetColumns()) {
       values.emplace_back(column.GetExpr()->EvaluateAggregate(temp.Key().group_bys_, temp.Val().aggregates_));
     }
     *tuple = Tuple(values, plan_->OutputSchema());

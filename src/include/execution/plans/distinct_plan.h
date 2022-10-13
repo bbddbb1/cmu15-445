@@ -12,7 +12,6 @@
 
 #pragma once
 
-
 #include "execution/plans/abstract_plan.h"
 
 namespace bustub {

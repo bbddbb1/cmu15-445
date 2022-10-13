@@ -13,13 +13,13 @@
 #pragma once
 
 #include <memory>
-#include <utility>
 #include <unordered_set>
+#include <utility>
 #include <vector>
 #include "common/util/hash_util.h"
 #include "execution/executors/abstract_executor.h"
-#include "execution/plans/distinct_plan.h"
 #include "execution/expressions/abstract_expression.h"
+#include "execution/plans/distinct_plan.h"
 namespace bustub {
 
 struct DistinctKey {
