@@ -42,6 +42,7 @@ void HashJoinExecutor::Init() {
     }
   }
   left_tuple_buffer_.clear();
+  bucket_cur_ = 0;
 }
 
 auto HashJoinExecutor::Next(Tuple *tuple, RID *rid) -> bool {
@@ -50,7 +51,7 @@ auto HashJoinExecutor::Next(Tuple *tuple, RID *rid) -> bool {
   if (bucket_cur_ >= left_tuple_buffer_.size()) {
     bool find = false;
     while (right_child_->Next(&right_tuple, &right_rid)) {
-      auto value = plan_->LeftJoinKeyExpression()->Evaluate(&right_tuple, plan_->GetRightPlan()->OutputSchema());
+      auto value = plan_->RightJoinKeyExpression()->Evaluate(&right_tuple, plan_->GetRightPlan()->OutputSchema());
       JoinKey key{value};
       auto key_value = hash.find(key);
       if (key_value != hash.end()) {
