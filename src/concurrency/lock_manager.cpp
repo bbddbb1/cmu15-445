@@ -157,7 +157,7 @@ auto LockManager::LockUpgrade(Transaction *txn, const RID &rid) -> bool {
 }
 
 auto LockManager::Unlock(Transaction *txn, const RID &rid) -> bool {
-  if(!txn->IsExclusiveLocked(rid) || !txn->IsSharedLocked(rid)){
+  if(!txn->IsExclusiveLocked(rid) && !txn->IsSharedLocked(rid)){
     return false;
   }
 
