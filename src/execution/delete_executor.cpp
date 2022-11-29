@@ -30,7 +30,6 @@ auto DeleteExecutor::Next([[maybe_unused]] Tuple *tuple, RID *rid) -> bool {
 
   if (child_executor_->Next(tuple, rid)) {
     auto *txn = exec_ctx_->GetTransaction();
-    auto isolation_level = txn->GetIsolationLevel();
     auto *lock_manager = exec_ctx_->GetLockManager();    
     if (txn->IsSharedLocked(*rid)) {
       if (!lock_manager->LockUpgrade(txn, *rid)) {
