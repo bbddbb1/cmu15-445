@@ -121,7 +121,7 @@ auto LockManager::LockUpgrade(Transaction *txn, const RID &rid) -> bool {
     return false;
   }
 
-  if (txn->IsSharedLocked(rid)) {
+  if (!txn->IsSharedLocked(rid)) {
     return false;
   }
 
