@@ -139,6 +139,7 @@ auto LockManager::LockUpgrade(Transaction *txn, const RID &rid) -> bool {
   while(!GetLock(txn, lock_table_[rid], LockMode::EXCLUSIVE)){
     lock_table_[rid].cv_.wait(u_latch);
     if (txn->GetState() == TransactionState::ABORTED) {
+      lock_table_[rid].upgrading_ = INVALID_TXN_ID;
       return false;
     }    
   }

@@ -25,6 +25,12 @@ void SeqScanExecutor::Init() { iter_ = table_info_->table_->Begin(exec_ctx_->Get
 
 auto SeqScanExecutor::Next(Tuple *tuple, RID *rid) -> bool {
   while (iter_ != table_end_) {
+    auto *txn = exec_ctx_->GetTransaction();
+    auto isolation_level = txn->GetIsolationLevel();
+    auto *lock_manager = exec_ctx_->GetLockManager();
+    if (isolation_level != IsolationLevel::READ_UNCOMMITTED &&
+        !lock_manager->LockShared(txn, *rid))
+      throw TransactionAbortException(txn->GetTransactionId(), AbortReason::DEADLOCK);    
     auto temp = iter_++;
     if (plan_->GetPredicate() != nullptr &&
         !plan_->GetPredicate()->Evaluate(&(*temp), &table_info_->schema_).GetAs<bool>()) {
@@ -36,6 +42,9 @@ auto SeqScanExecutor::Next(Tuple *tuple, RID *rid) -> bool {
     }
     *tuple = Tuple(values, GetOutputSchema());
     *rid = temp->GetRid();
+    if(isolation_level == IsolationLevel::READ_COMMITTED && !lock_manager->Unlock(txn, *rid)){
+      throw TransactionAbortException(txn->GetTransactionId(), AbortReason::DEADLOCK);
+    }
     return true;
   }
   return false;

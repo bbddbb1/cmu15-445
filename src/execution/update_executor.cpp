@@ -27,6 +27,18 @@ void UpdateExecutor::Init() { child_executor_->Init(); }
 
 auto UpdateExecutor::Next([[maybe_unused]] Tuple *tuple, RID *rid) -> bool {
   if (child_executor_->Next(tuple, rid)) {
+    auto *txn = exec_ctx_->GetTransaction();
+    auto isolation_level = txn->GetIsolationLevel();
+    auto *lock_manager = exec_ctx_->GetLockManager();
+    if (txn->IsSharedLocked(*rid)) {
+      if (!lock_manager->LockUpgrade(txn, *rid)) {
+        throw TransactionAbortException(txn->GetTransactionId(), AbortReason::DEADLOCK);
+      }
+    } else {
+      if (!lock_manager->LockExclusive(txn, *rid)) {
+        throw TransactionAbortException(txn->GetTransactionId(), AbortReason::DEADLOCK);
+      }
+    }
     Tuple updated_tuple = GenerateUpdatedTuple(*tuple);
     if (table_info_->table_->UpdateTuple(updated_tuple, *rid, exec_ctx_->GetTransaction())) {
       for (auto index_info : index_info_) {
@@ -36,6 +48,9 @@ auto UpdateExecutor::Next([[maybe_unused]] Tuple *tuple, RID *rid) -> bool {
             tuple->KeyFromTuple(table_info_->schema_, index_info->key_schema_, index_info->index_->GetKeyAttrs());
         index_info->index_->DeleteEntry(old_key, *rid, exec_ctx_->GetTransaction());
         index_info->index_->InsertEntry(new_key, *rid, exec_ctx_->GetTransaction());
+
+        txn->AppendIndexWriteRecord({IndexWriteRecord{*rid, table_info_->oid_, WType::UPDATE, new_key, old_key,
+                                                      index_info->index_oid_, exec_ctx_->GetCatalog()}});
       }
       return true;
     }
