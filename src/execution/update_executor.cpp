@@ -48,7 +48,7 @@ auto UpdateExecutor::Next([[maybe_unused]] Tuple *tuple, RID *rid) -> bool {
         index_info->index_->DeleteEntry(old_key, *rid, exec_ctx_->GetTransaction());
         index_info->index_->InsertEntry(new_key, *rid, exec_ctx_->GetTransaction());
 
-        txn->AppendIndexWriteRecord({IndexWriteRecord{*rid, table_info_->oid_, WType::UPDATE, new_key, old_key,
+        txn->AppendIndexWriteRecord({IndexWriteRecord{*rid, table_info_->oid_, WType::UPDATE, updated_tuple, *tuple,
                                                       index_info->index_oid_, exec_ctx_->GetCatalog()}});
       }
       return true;
