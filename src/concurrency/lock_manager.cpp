@@ -25,8 +25,7 @@ auto LockManager::GetLock(Transaction *txn, LockRequestQueue &lock_request_queue
   }
   bool abort = false;
   bool success = true;
-  bool all_s = true;
-  for (auto &iter = request_queue.begin(); iter->txn_id_ != txn_id; ++iter) {
+  for (auto iter = request_queue.begin(); iter->txn_id_ != txn_id; ++iter) {
     if ((mode == LockMode::EXCLUSIVE || iter->lock_mode_ == LockMode::EXCLUSIVE)) {
       if(iter->txn_id_ < txn_id){
         auto *young = TransactionManager::GetTransaction(iter->txn_id_);
@@ -129,7 +128,6 @@ auto LockManager::LockUpgrade(Transaction *txn, const RID &rid) -> bool {
   if (txn->IsExclusiveLocked(rid)) {
     return true;
   }
-  auto txn_id = txn->GetTransactionId();
   std::unique_lock<std::mutex> u_latch(latch_);
   auto &queue = lock_table_[rid].request_queue_;
   //another transaction is already waiting to upgrade their lock
