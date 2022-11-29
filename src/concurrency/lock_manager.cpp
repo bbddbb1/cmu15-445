@@ -27,7 +27,7 @@ auto LockManager::GetLock(Transaction *txn, LockRequestQueue &lock_request_queue
   bool success = true;
   for (auto iter = request_queue.begin(); iter->txn_id_ != txn_id; ++iter) {
     if ((mode == LockMode::EXCLUSIVE || iter->lock_mode_ == LockMode::EXCLUSIVE)) {
-      if(iter->txn_id_ < txn_id){
+      if(iter->txn_id_ > txn_id){
         auto *young = TransactionManager::GetTransaction(iter->txn_id_);
         if (young->GetState() != TransactionState::ABORTED) {
           young->SetState(TransactionState::ABORTED);
