@@ -29,6 +29,7 @@ auto LockManager::GetLock(Transaction *txn, LockRequestQueue &lock_request_queue
     if ((mode == LockMode::EXCLUSIVE || iter->lock_mode_ == LockMode::EXCLUSIVE)) {
       if(iter->txn_id_ > txn_id){
         auto *young = TransactionManager::GetTransaction(iter->txn_id_);
+        assert(young != nullptr);
         if (young->GetState() != TransactionState::ABORTED) {
           young->SetState(TransactionState::ABORTED);
           abort = true;
@@ -168,13 +169,17 @@ auto LockManager::Unlock(Transaction *txn, const RID &rid) -> bool {
 
   std::unique_lock<std::mutex> u_latch(latch_);
   auto &queue = lock_table_[rid].request_queue_;
+  bool success = false;
   for (auto iter = queue.begin(); iter != queue.end(); iter++) {
     if (iter->txn_id_ == txn->GetTransactionId()) {
       queue.erase(iter);
       lock_table_[rid].cv_.notify_all();
+      success = true;
       break;
     }
   }
+  if(!success)
+    return false;
   txn->GetSharedLockSet()->erase(rid);
   txn->GetExclusiveLockSet()->erase(rid);
   return true;
