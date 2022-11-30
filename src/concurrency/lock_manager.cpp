@@ -61,6 +61,7 @@ auto LockManager::LockShared(Transaction *txn, const RID &rid) -> bool {
   std::unique_lock<std::mutex> u_latch(latch_);
   auto &queue = lock_table_[rid].request_queue_;
   queue.emplace_back(txn->GetTransactionId(), LockMode::SHARED);
+  txn->GetSharedLockSet()->emplace(rid);
   while (!GetLock(txn, lock_table_[rid], LockMode::SHARED)) {
     lock_table_[rid].cv_.wait(u_latch);
     if (txn->GetState() == TransactionState::ABORTED) {
@@ -73,7 +74,6 @@ auto LockManager::LockShared(Transaction *txn, const RID &rid) -> bool {
       break;
     }
   }
-  txn->GetSharedLockSet()->emplace(rid);
   return true;
 }
 
@@ -94,6 +94,7 @@ auto LockManager::LockExclusive(Transaction *txn, const RID &rid) -> bool {
   std::unique_lock<std::mutex> u_latch(latch_);
   auto &queue = lock_table_[rid].request_queue_;
   queue.emplace_back(txn->GetTransactionId(), LockMode::EXCLUSIVE);
+  txn->GetExclusiveLockSet()->emplace(rid);
   while (!GetLock(txn, lock_table_[rid], LockMode::EXCLUSIVE)) {
     lock_table_[rid].cv_.wait(u_latch);
     if (txn->GetState() == TransactionState::ABORTED) {
@@ -107,8 +108,6 @@ auto LockManager::LockExclusive(Transaction *txn, const RID &rid) -> bool {
       break;
     }
   }
-
-  txn->GetExclusiveLockSet()->emplace(rid);
   return true;
 }
 
