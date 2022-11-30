@@ -61,7 +61,7 @@ class LockManager {
 
   ~LockManager() = default;
 
-  auto GetLock(Transaction *txn, LockRequestQueue &request_queue, LockMode mode) -> bool;
+  auto GetLock(Transaction *txn, LockRequestQueue *request_queue, LockMode mode) -> bool;
   /*
    * [LOCK_NOTE]: For all locking functions, we:
    * 1. return false if the transaction is aborted; and

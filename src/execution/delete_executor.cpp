@@ -27,10 +27,9 @@ DeleteExecutor::DeleteExecutor(ExecutorContext *exec_ctx, const DeletePlanNode *
 void DeleteExecutor::Init() { child_executor_->Init(); }
 
 auto DeleteExecutor::Next([[maybe_unused]] Tuple *tuple, RID *rid) -> bool {
-
   if (child_executor_->Next(tuple, rid)) {
     auto *txn = exec_ctx_->GetTransaction();
-    auto *lock_manager = exec_ctx_->GetLockManager();    
+    auto *lock_manager = exec_ctx_->GetLockManager();
     if (txn->IsSharedLocked(*rid)) {
       if (!lock_manager->LockUpgrade(txn, *rid)) {
         throw TransactionAbortException(txn->GetTransactionId(), AbortReason::DEADLOCK);
@@ -45,8 +44,11 @@ auto DeleteExecutor::Next([[maybe_unused]] Tuple *tuple, RID *rid) -> bool {
         auto key =
             tuple->KeyFromTuple(table_info_->schema_, index_info->key_schema_, index_info->index_->GetKeyAttrs());
         index_info->index_->DeleteEntry(key, *rid, txn);
-        txn->AppendIndexWriteRecord(IndexWriteRecord{*rid, table_info_->oid_, WType::DELETE, *tuple, Tuple{},
-                                                     index_info->index_oid_, exec_ctx_->GetCatalog()});
+        // no rvalue reference
+        // txn->AppendIndexWriteRecord(IndexWriteRecord{*rid, table_info_->oid_, WType::DELETE, *tuple, Tuple{},
+        //                                              index_info->index_oid_, exec_ctx_->GetCatalog()});
+        txn->GetIndexWriteSet()->emplace_back(*rid, table_info_->oid_, WType::DELETE, *tuple, index_info->index_oid_,
+                                              exec_ctx_->GetCatalog());
       }
       return true;
     }

@@ -39,8 +39,10 @@ void InsertExecutor::Insert(Tuple *tuple, RID *rid) {
     index_info->index_->InsertEntry(
         tuple->KeyFromTuple(table_info_->schema_, index_info->key_schema_, index_info->index_->GetKeyAttrs()), *rid,
         exec_ctx_->GetTransaction());
-    exec_ctx_->GetTransaction()->AppendIndexWriteRecord(IndexWriteRecord{
-        *rid, table_info_->oid_, WType::INSERT, *tuple, Tuple{}, index_info->index_oid_, exec_ctx_->GetCatalog()});
+    // exec_ctx_->GetTransaction()->AppendIndexWriteRecord(IndexWriteRecord{
+    //     *rid, table_info_->oid_, WType::INSERT, *tuple, Tuple{}, index_info->index_oid_, exec_ctx_->GetCatalog()});
+    exec_ctx_->GetTransaction()->GetIndexWriteSet()->emplace_back(*rid, table_info_->oid_, WType::INSERT, *tuple,
+                                                                  index_info->index_oid_, exec_ctx_->GetCatalog());
   }
 }
 auto InsertExecutor::Next([[maybe_unused]] Tuple *tuple, RID *rid) -> bool {

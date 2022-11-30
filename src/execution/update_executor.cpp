@@ -48,8 +48,14 @@ auto UpdateExecutor::Next([[maybe_unused]] Tuple *tuple, RID *rid) -> bool {
         index_info->index_->DeleteEntry(old_key, *rid, exec_ctx_->GetTransaction());
         index_info->index_->InsertEntry(new_key, *rid, exec_ctx_->GetTransaction());
 
-        txn->AppendIndexWriteRecord({IndexWriteRecord{*rid, table_info_->oid_, WType::UPDATE, updated_tuple, *tuple,
-                                                      index_info->index_oid_, exec_ctx_->GetCatalog()}});
+        // txn->AppendIndexWriteRecord({IndexWriteRecord{*rid, table_info_->oid_, WType::UPDATE, updated_tuple, *tuple,
+        //                                               index_info->index_oid_, exec_ctx_->GetCatalog()}});
+        auto undo_index_rec = IndexWriteRecord(*rid, table_info_->oid_, WType::UPDATE, updated_tuple,
+                                               index_info->index_oid_, exec_ctx_->GetCatalog());
+        undo_index_rec.old_tuple_ = *tuple;
+        txn->GetIndexWriteSet()->emplace_back(undo_index_rec);
+        // txn->GetIndexWriteSet()->emplace_back(*rid, table_info_->oid_, WType::UPDATE, updated_tuple, *tuple,
+        //                                       index_info->index_oid_, exec_ctx_->GetCatalog());
       }
       return true;
     }
